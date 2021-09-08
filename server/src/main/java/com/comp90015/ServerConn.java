@@ -61,11 +61,11 @@ public class ServerConn extends Thread {
         serverMessage = new Packet.NewIdentity("", newId);
         sendMessage(gson.toJson(serverMessage));
 
-//        serverMessage = new Packet.RoomChange(newId, "", "MainHall");
-//        sendMessage(gson.toJson(serverMessage));
+        serverMessage = new Packet.RoomChange(newId, "", "MainHall");
+        sendMessage(gson.toJson(serverMessage));
 
-//        serverMessage = new Packet.RoomList(roomList);
-//        sendMessage(gson.toJson(serverMessage));
+        serverMessage = new Packet.RoomList(server.listRooms());
+        sendMessage(gson.toJson(serverMessage));
 
         connectionAlive = true;
         String in;

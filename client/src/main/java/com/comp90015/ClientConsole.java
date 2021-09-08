@@ -63,7 +63,7 @@ public class ClientConsole extends Thread {
 //                }
 //                synchronized (client) {
                 // TODO: Concurrency
-                Thread.sleep(200);
+                Thread.sleep(100);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
 //                }
                 consoleMsg = reader.readLine();
