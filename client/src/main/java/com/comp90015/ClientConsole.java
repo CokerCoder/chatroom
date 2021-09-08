@@ -123,6 +123,13 @@ public class ClientConsole extends Thread {
                     System.out.println("Invalid command");
                 }
                 break;
+            case "who":
+                if (words.length > 1) {
+                    toServerMessage = new Packet.Who(words[1]);
+                } else {
+                    System.out.println("Invalid command");
+                }
+                break;
             case "list":
                 toServerMessage = new Packet.List();
                 break;

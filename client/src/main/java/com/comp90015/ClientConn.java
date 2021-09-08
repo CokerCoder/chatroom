@@ -105,6 +105,21 @@ public class ClientConn extends Thread {
             }
         }
 
+        if (serverMessage instanceof Packet.RoomContents) {
+            System.out.println("received roomcontent message");
+            Packet.RoomContents roomContentsMessage = (Packet.RoomContents) serverMessage;
+            String[] data = gson.fromJson(roomContentsMessage.getIdentities(), String[].class);
+
+            System.out.format("%s contains", roomContentsMessage.getRoomid());
+            for (String guest : data) {
+                System.out.print(" " + guest);
+                if (guest.equals(roomContentsMessage.getOwner())) {
+                    System.out.print("*");
+                }
+            }
+            System.out.print("\n");
+        }
+
         if (serverMessage instanceof Packet.RoomList) {
             Packet.RoomList roomListMessage = (Packet.RoomList) serverMessage;
             ChatRoom[] data = gson.fromJson(roomListMessage.getRooms(), ChatRoom[].class);

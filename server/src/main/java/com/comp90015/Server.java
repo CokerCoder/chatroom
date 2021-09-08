@@ -32,6 +32,11 @@ public class Server {
         put("MainHall", new ArrayList<ServerConn>());
     }};
 
+    // room owner list with room id with key and initialize with a empty "Main Hall"
+    private Map<String, String> owners = new HashMap<>() {{
+        put("MainHall", "");
+    }};
+
     // TODO: number list keep track of the least unused number
 
 
@@ -106,6 +111,18 @@ public class Server {
     }
 
     /*
+    * List all the guests connected in the given room
+    * */
+    public String listGuests(String roomid) {
+        if (!rooms.containsKey(roomid)) return "";
+        List<String> data = new ArrayList<>();
+        for (ServerConn serverConn: rooms.get(roomid)) {
+            data.add(serverConn.getIdentity());
+        }
+        return gson.toJson(data);
+    }
+
+    /*
      * Let the given guest join the given room, synchronize operation
      * */
     public synchronized boolean joinRoom(ServerConn guest, String roomid) {
@@ -128,6 +145,13 @@ public class Server {
 
         rooms.put(roomid, guests);
         guest.setRoomid(roomid);
+
+        // if moving to the MainHall, send room content
+        if (roomid == "MainHall") {
+            Packet.ToClient serverMessage = new Packet.RoomContents(roomid,
+                    listGuests(roomid), "");
+            guest.sendMessage(gson.toJson(serverMessage));
+        }
 
         System.out.println("User-" + guest.getIdentity() + " joined chat room: " + roomid);
         return true;

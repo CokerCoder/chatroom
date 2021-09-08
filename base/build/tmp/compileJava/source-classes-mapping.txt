@@ -6,14 +6,17 @@ com/comp90015/base/ChatRoom.java
 com/comp90015/base/Packet.java
  com.comp90015.base.Packet
  com.comp90015.base.Packet$CreateRoom
+ com.comp90015.base.Packet$Delete
  com.comp90015.base.Packet$IdentityChange
  com.comp90015.base.Packet$Join
  com.comp90015.base.Packet$List
  com.comp90015.base.Packet$NewIdentity
  com.comp90015.base.Packet$Quit
  com.comp90015.base.Packet$RoomChange
+ com.comp90015.base.Packet$RoomContents
  com.comp90015.base.Packet$RoomList
  com.comp90015.base.Packet$ToCMessage
  com.comp90015.base.Packet$ToClient
  com.comp90015.base.Packet$ToSMessage
  com.comp90015.base.Packet$ToServer
+ com.comp90015.base.Packet$Who

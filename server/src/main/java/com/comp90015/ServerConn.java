@@ -138,6 +138,13 @@ public class ServerConn extends Thread {
             sendMessage(gson.toJson(serverMessage));
         }
 
+        if (clientMessage instanceof Packet.Who) {
+            Packet.Who whoMessage = (Packet.Who) clientMessage;
+            serverMessage = new Packet.RoomContents(whoMessage.getRoomid(),
+                    server.listGuests(whoMessage.getRoomid()), "");
+            sendMessage(gson.toJson(serverMessage));
+        }
+
         if (clientMessage instanceof Packet.ToSMessage) {
             Packet.ToSMessage toSMessage = (Packet.ToSMessage) clientMessage;
             serverMessage = new Packet.ToCMessage(toSMessage.getContent(), identity);
