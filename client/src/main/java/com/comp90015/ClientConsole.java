@@ -85,6 +85,7 @@ public class ClientConsole extends Thread {
      * Parse the user input from the console
      * */
     public void parse(String consoleMessage) {
+        if (consoleMessage.length()==0) return;
         if (consoleMessage.charAt(0) == '#') {
             parseCommand(consoleMessage.substring(1));
         } else {
