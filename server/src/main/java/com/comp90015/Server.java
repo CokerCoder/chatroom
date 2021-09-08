@@ -1,5 +1,10 @@
 package com.comp90015;
 
+import com.comp90015.base.ChatRoom;
+
+import com.comp90015.base.Packet;
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.google.gson.Gson;
-//import message.ServerMessage;
 
 public class Server {
 
@@ -22,7 +25,7 @@ public class Server {
     // JSON Parser
     private final Gson gson = new Gson();
 
-//    private List<com.comp90015.base.ChatRoom> chatRooms = new ArrayList<>();
+    private List<ChatRoom> chatRooms = new ArrayList<>();
 
     // room list with room id with key and initialize with a empty "Main Hall"
     private Map<String, List<ServerConn>> rooms = new HashMap<String, List<ServerConn>>() {{
@@ -55,7 +58,7 @@ public class Server {
 
                 // let the guest join Main Hall by default
                 joinRoom(serverConn, "MainHall");
-//                System.out.println("all rooms: " + listRooms());
+                System.out.println("all rooms: " + listRooms());
 
             }
         } catch (IOException e) {
@@ -67,14 +70,14 @@ public class Server {
         }
     }
 
-//    public void broadcast(ServerMessage serverMessage, String roomid, com.comp90015.ServerConn ignored) {
-//        synchronized (rooms) {
-//            for (com.comp90015.ServerConn conn : rooms.get(roomid)) {
-//                if (ignored == null || !ignored.equals(conn))
-//                    conn.sendMessage(gson.toJson(serverMessage));
-//            }
-//        }
-//    }
+    public void broadcast(Packet.ToClient toClientMessage, String roomid, ServerConn ignored) {
+        synchronized (rooms) {
+            for (com.comp90015.ServerConn conn : rooms.get(roomid)) {
+                if (ignored == null || !ignored.equals(conn))
+                    conn.sendMessage(gson.toJson(toClientMessage));
+            }
+        }
+    }
 
     /*
      * Close the current server socket
@@ -93,14 +96,14 @@ public class Server {
     /*
      * List all the current active chat rooms
      * */
-//    public String listRooms() {
-//        List<com.comp90015.base.ChatRoom> data = new ArrayList<com.comp90015.base.ChatRoom>();
-//        for (Map.Entry<String, List<com.comp90015.ServerConn>> entry: rooms.entrySet()) {
-//            com.comp90015.base.ChatRoom room = new com.comp90015.base.ChatRoom(entry.getKey(), entry.getValue().size());
-//            data.add(room);
-//        }
-//        return gson.toJson(data);
-//    }
+    public String listRooms() {
+        List<ChatRoom> data = new ArrayList<>();
+        for (Map.Entry<String, List<ServerConn>> entry: rooms.entrySet()) {
+            ChatRoom room = new ChatRoom(entry.getKey(), entry.getValue().size());
+            data.add(room);
+        }
+        return gson.toJson(data);
+    }
 
     /*
      * Let the given guest join the given room, synchronize operation

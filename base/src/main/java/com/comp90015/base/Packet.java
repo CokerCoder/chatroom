@@ -101,6 +101,10 @@ public class Packet {
             super("identitychange");
             this.identity = identity;
         }
+
+        public String getIdentity() {
+            return identity;
+        }
     }
 
     public static class Join extends ToServer {
@@ -142,6 +146,10 @@ public class Packet {
     }
 
     public static class ToSMessage extends ToServer {
+        public String getContent() {
+            return content;
+        }
+
         private String content;
 
         public ToSMessage(String content) {

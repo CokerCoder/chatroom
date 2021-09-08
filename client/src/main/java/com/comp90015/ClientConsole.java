@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+
 /*
  * This class is responsible for reading input from the client console
  * and wrap it with JSON and sent it to the server
@@ -67,7 +68,6 @@ public class ClientConsole extends Thread {
 //                }
                 consoleMsg = reader.readLine();
                 if (consoleMsg != null) {
-                    // TODO: use thread pool to handle parsing
                     parse(consoleMsg);
                 } else {
                     connectionAlive = false;

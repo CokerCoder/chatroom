@@ -3,6 +3,7 @@ package com.comp90015;
 import java.io.IOException;
 import java.net.Socket;
 
+
 public class Client {
 
     private String host;

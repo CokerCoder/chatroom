@@ -1,16 +1,17 @@
 package com.comp90015;
 
+import com.comp90015.base.ChatRoom;
 import com.comp90015.base.Packet;
 import com.comp90015.base.RuntimeTypeAdapterFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-//import server.ChatRoom;
 
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
+
 
 /*
  * This class is responsible for reading input from the server socket
@@ -22,7 +23,7 @@ public class ClientConn extends Thread {
             .registerSubtype(Packet.NewIdentity.class, "newidentity")
             .registerSubtype(Packet.ToCMessage.class, "message")
             .registerSubtype(Packet.RoomChange.class, "roomchange")
-            .registerSubtype(Packet.RoomChange.class, "roomlist");
+            .registerSubtype(Packet.RoomList.class, "roomlist");
 
     Gson gson = new GsonBuilder()
             .registerTypeAdapterFactory(runtimeTypeAdapterFactory)
@@ -43,15 +44,12 @@ public class ClientConn extends Thread {
 
     @Override
     public void run() {
-//        System.out.println(this.client);
         connectionAlive = true;
         String serverMsg;
         while (connectionAlive) {
             try {
                 serverMsg  = reader.readLine();
                 if (serverMsg != null) {
-//                    System.out.println("received from server: " + serverMsg);
-                    // TODO: Use thread pool to handle parsing
                     parseJSON(serverMsg);
                 } else {
                     connectionAlive = false;
@@ -108,11 +106,10 @@ public class ClientConn extends Thread {
 
         if (serverMessage instanceof Packet.RoomList) {
             Packet.RoomList roomListMessage = (Packet.RoomList) serverMessage;
-//            ChatRoom[] data = gson.fromJson(serverMessage.getRooms(), ChatRoom[].class);
-//            for (ChatRoom chatRoom : data) {
-//                System.out.format("%s: %d guests\n", chatRoom.getRoomid(), chatRoom.getCount());
-//            }
-            System.out.println("roomlist message");
+            ChatRoom[] data = gson.fromJson(roomListMessage.getRooms(), ChatRoom[].class);
+            for (ChatRoom chatRoom : data) {
+                System.out.format("%s: %d guests\n", chatRoom.getRoomid(), chatRoom.getCount());
+            }
         }
     }
 

@@ -1,9 +1,10 @@
 package com.comp90015;
 
 import com.comp90015.base.Packet;
+import com.comp90015.base.RuntimeTypeAdapterFactory;
+
 import com.google.gson.Gson;
-//import message.ClientMessage;
-//import message.ServerMessage;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.UUID;
+
 
 public class ServerConn extends Thread {
 
@@ -23,8 +25,18 @@ public class ServerConn extends Thread {
     private String identity;
     private String roomid;
 
-    // JSON Parser
-    private final Gson gson = new Gson();
+    RuntimeTypeAdapterFactory<Packet.ToServer> runtimeTypeAdapterFactory = RuntimeTypeAdapterFactory
+            .of(Packet.ToServer.class, "type")
+            .registerSubtype(Packet.IdentityChange.class, "identitychange")
+            .registerSubtype(Packet.ToSMessage.class, "message")
+            .registerSubtype(Packet.Join.class, "join")
+            .registerSubtype(Packet.List.class, "list")
+            .registerSubtype(Packet.CreateRoom.class, "createroom")
+            .registerSubtype(Packet.Quit.class, "quit");
+
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapterFactory(runtimeTypeAdapterFactory)
+            .create();
 
     public ServerConn(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -44,27 +56,16 @@ public class ServerConn extends Thread {
         String newId = UUID.randomUUID().toString();
         this.identity = newId;
 
-        // the server sends a NewIdentity message to the new client
-//        ServerMessage serverMessage = new ServerMessage.ServerMessageBuilder("newidentity")
-//                .former("")
-//                .identity(newId)
-//                .build();
+        // the server sends some initial messages to the client
+        Packet.ToClient serverMessage;
+        serverMessage = new Packet.NewIdentity("", newId);
+        sendMessage(gson.toJson(serverMessage));
+
+//        serverMessage = new Packet.RoomChange(newId, "", "MainHall");
 //        sendMessage(gson.toJson(serverMessage));
 
-        Packet.NewIdentity serverMessage = new Packet.NewIdentity("", newId);
-
-//        ServerMessage serverMessage1 = new ServerMessage.ServerMessageBuilder("roomchange")
-//                .identity(newId)
-//                .former("")
-//                .roomid("MainHall")
-//                .build();
-//        sendMessage(gson.toJson(serverMessage1));
-//
-//        String roomList = server.listRooms();
-//        serverMessage = new ServerMessage.ServerMessageBuilder("roomlist")
-//                .rooms(roomList)
-//                .build();
-        sendMessage(gson.toJson(serverMessage));
+//        serverMessage = new Packet.RoomList(roomList);
+//        sendMessage(gson.toJson(serverMessage));
 
         connectionAlive = true;
         String in;
@@ -72,8 +73,7 @@ public class ServerConn extends Thread {
             try {
                 in  = reader.readLine();
                 if (in != null) {
-                    // TODO: use thread pool to handle parsing
-//                    parseJSON(in);
+                    parseJSON(in);
                 } else {
                     connectionAlive = false;
                 }
@@ -106,73 +106,59 @@ public class ServerConn extends Thread {
         writer.println(message);
     }
 
-//    public void parseJSON(String jsonText) {
-//        ClientMessage clientMessage = gson.fromJson(jsonText, ClientMessage.class);
-//
-//        String messageType = clientMessage.getType();
-//
-//        ServerMessage serverMessage = null;
-//
-//        switch (messageType) {
-//            case "identitychange":
-//                String newIdentity = clientMessage.getIdentity();
-//                if (server.isValidIdentity(newIdentity)) {
-//                    serverMessage = new ServerMessage.ServerMessageBuilder("newidentity")
-//                            .former(identity)
-//                            .identity(newIdentity)
-//                            .build();
-//                    server.broadcast(serverMessage, roomid, null);
-//                    this.identity = clientMessage.getIdentity();
-//                } else {
-//                    serverMessage = new ServerMessage.ServerMessageBuilder("newidentity")
-//                            .former(identity)
-//                            .identity(identity)
-//                            .build();
-//                    sendMessage(gson.toJson(serverMessage));
-//                }
-//                break;
-//            case "join":
-//                String former = this.roomid;
-//                boolean success = server.joinRoom(this, clientMessage.getRoomid());
-//                if (success) {
-//                    this.roomid = clientMessage.getRoomid();
-//                }
-//                serverMessage = new ServerMessage.ServerMessageBuilder("roomchange")
-//                        .identity(clientMessage.getIdentity())
-//                        .former(former)
-//                        .roomid(this.getRoomid())
-//                        .build();
-//                sendMessage(gson.toJson(serverMessage));
-//                break;
-//            case "message":
-//                serverMessage = new ServerMessage.ServerMessageBuilder("message")
-//                        .identity(identity)
-//                        .content(clientMessage.getContent())
-//                        .build();
-//                server.broadcast(serverMessage, roomid, this);
-//                break;
-//            case "list":
-//                // query server for room list
-//                String roomList = server.listRooms();
-//                serverMessage = new ServerMessage.ServerMessageBuilder("roomlist")
-//                        .rooms(roomList)
-//                        .build();
-//                sendMessage(gson.toJson(serverMessage));
-//                break;
-//            case "createroom":
-//                String roomid = clientMessage.getRoomid();
-//                if (server.isValidRoomid(roomid)) {
-//                    server.createRoom(roomid, this.identity);
-//                }
-//                serverMessage = new ServerMessage.ServerMessageBuilder("roomlist")
-//                        .rooms(server.listRooms())
-//                        .build();
-//                sendMessage(gson.toJson(serverMessage));
-//                break;
-//        }
+    public void parseJSON(String jsonText) {
 
+        Packet.ToServer clientMessage = gson.fromJson(jsonText, Packet.ToServer.class);
 
-//    }
+        Packet.ToClient serverMessage = null;
+
+        if (clientMessage instanceof Packet.IdentityChange) {
+            Packet.IdentityChange identityChangeMessage = (Packet.IdentityChange) clientMessage;
+            String newIdentity = identityChangeMessage.getIdentity();
+            if (server.isValidIdentity(newIdentity)) {
+                serverMessage = new Packet.NewIdentity(identity, newIdentity);
+                server.broadcast(serverMessage, roomid, null);
+                this.identity = identityChangeMessage.getIdentity();
+            } else {
+                serverMessage = new Packet.NewIdentity(identity, identity);
+                sendMessage(gson.toJson(serverMessage));
+            }
+        }
+
+        if (clientMessage instanceof Packet.Join) {
+            Packet.Join joinMessage = (Packet.Join) clientMessage;
+            String former = this.roomid;
+            boolean success = server.joinRoom(this, joinMessage.getRoomid());
+            if (success) {
+                this.roomid = joinMessage.getRoomid();
+            }
+            serverMessage = new Packet.RoomChange(identity, former, roomid);
+            sendMessage(gson.toJson(serverMessage));
+        }
+
+        if (clientMessage instanceof Packet.ToSMessage) {
+            Packet.ToSMessage toSMessage = (Packet.ToSMessage) clientMessage;
+            serverMessage = new Packet.ToCMessage(toSMessage.getContent(), identity);
+            server.broadcast(serverMessage, roomid, this);
+        }
+
+        if (clientMessage instanceof Packet.List) {
+            // query server for room list
+            String roomList = server.listRooms();
+            serverMessage = new Packet.RoomList(roomList);
+            sendMessage(gson.toJson(serverMessage));
+        }
+
+        if (clientMessage instanceof Packet.CreateRoom) {
+            Packet.CreateRoom createRoomMessage = (Packet.CreateRoom) clientMessage;
+            String roomid = createRoomMessage.getRoomid();
+            if (server.isValidRoomid(roomid)) {
+                server.createRoom(roomid, this.identity);
+            }
+            serverMessage = new Packet.RoomList(server.listRooms());
+            sendMessage(gson.toJson(serverMessage));
+        }
+    }
 
     public String getIdentity() {
         return identity;
