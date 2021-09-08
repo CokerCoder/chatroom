@@ -1,0 +1,12 @@
+com/comp90015/base/ChatRoom.java
+ com.comp90015.base.ChatRoom
+com/comp90015/base/RuntimeTypeAdapterFactory.java
+ com.comp90015.base.RuntimeTypeAdapterFactory
+ com.comp90015.base.RuntimeTypeAdapterFactory$1
+com/comp90015/base/Packet.java
+ com.comp90015.base.Packet
+ com.comp90015.base.Packet$IdentityChange
+ com.comp90015.base.Packet$Message
+ com.comp90015.base.Packet$NewIdentity
+ com.comp90015.base.Packet$ToClient
+ com.comp90015.base.Packet$ToServer
