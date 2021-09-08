@@ -21,9 +21,10 @@ public class ClientConn extends Thread {
     RuntimeTypeAdapterFactory<Packet.ToClient> runtimeTypeAdapterFactory = RuntimeTypeAdapterFactory
             .of(Packet.ToClient.class, "type")
             .registerSubtype(Packet.NewIdentity.class, "newidentity")
-            .registerSubtype(Packet.ToCMessage.class, "message")
             .registerSubtype(Packet.RoomChange.class, "roomchange")
-            .registerSubtype(Packet.RoomList.class, "roomlist");
+            .registerSubtype(Packet.RoomContents.class, "roomcontents")
+            .registerSubtype(Packet.RoomList.class, "roomlist")
+            .registerSubtype(Packet.ToCMessage.class, "message");
 
     Gson gson = new GsonBuilder()
             .registerTypeAdapterFactory(runtimeTypeAdapterFactory)

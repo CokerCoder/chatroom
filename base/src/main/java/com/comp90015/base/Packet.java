@@ -29,25 +29,6 @@ public class Packet {
         }
     }
 
-    public static class ToCMessage extends ToClient {
-        private String content;
-        private String identity;
-
-        public ToCMessage(String content, String identity) {
-            super("message");
-            this.content = content;
-            this.identity = identity;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public String getIdentity() {
-            return identity;
-        }
-    }
-
     public static class RoomChange extends ToClient {
         private String identity;
         private String former;
@@ -73,6 +54,31 @@ public class Packet {
         }
     }
 
+    public static class RoomContents extends ToClient {
+        private String roomid;
+        private String identities;
+        private String owner;
+
+        public RoomContents(String roomid, String identities, String owner) {
+            super("roomcontents");
+            this.roomid = roomid;
+            this.identities = identities;
+            this.owner = owner;
+        }
+
+        public String getRoomid() {
+            return roomid;
+        }
+
+        public String getIdentities() {
+            return identities;
+        }
+
+        public String getOwner() {
+            return owner;
+        }
+    }
+
     public static class RoomList extends ToClient {
         private String rooms;
 
@@ -85,6 +91,27 @@ public class Packet {
             return rooms;
         }
     }
+
+    public static class ToCMessage extends ToClient {
+        private String content;
+        private String identity;
+
+        public ToCMessage(String content, String identity) {
+            super("message");
+            this.content = content;
+            this.identity = identity;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public String getIdentity() {
+            return identity;
+        }
+    }
+
+
 
     public static abstract class ToServer {
         protected String type;
@@ -120,6 +147,19 @@ public class Packet {
         }
     }
 
+    public static class Who extends ToServer {
+        private String roomid;
+
+        public Who(String roomid) {
+            super("who");
+            this.roomid = roomid;
+        }
+
+        public String getRoomid() {
+            return roomid;
+        }
+    }
+
     public static class List extends ToServer {
         public List() {
             super("list");
@@ -131,6 +171,19 @@ public class Packet {
 
         public CreateRoom(String roomid) {
             super("createroom");
+            this.roomid = roomid;
+        }
+
+        public String getRoomid() {
+            return roomid;
+        }
+    }
+
+    public static class Delete extends ToServer {
+        private String roomid;
+
+        public Delete(String roomid) {
+            super("delete");
             this.roomid = roomid;
         }
 

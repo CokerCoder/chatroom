@@ -28,11 +28,13 @@ public class ServerConn extends Thread {
     RuntimeTypeAdapterFactory<Packet.ToServer> runtimeTypeAdapterFactory = RuntimeTypeAdapterFactory
             .of(Packet.ToServer.class, "type")
             .registerSubtype(Packet.IdentityChange.class, "identitychange")
-            .registerSubtype(Packet.ToSMessage.class, "message")
             .registerSubtype(Packet.Join.class, "join")
+            .registerSubtype(Packet.Who.class, "who")
             .registerSubtype(Packet.List.class, "list")
             .registerSubtype(Packet.CreateRoom.class, "createroom")
-            .registerSubtype(Packet.Quit.class, "quit");
+            .registerSubtype(Packet.Delete.class, "delete")
+            .registerSubtype(Packet.Quit.class, "quit")
+            .registerSubtype(Packet.ToSMessage.class, "message");
 
     Gson gson = new GsonBuilder()
             .registerTypeAdapterFactory(runtimeTypeAdapterFactory)
