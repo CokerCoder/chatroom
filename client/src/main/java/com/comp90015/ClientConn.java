@@ -3,7 +3,6 @@ package com.comp90015;
 import com.comp90015.base.ChatRoom;
 import com.comp90015.base.Packet;
 import com.comp90015.base.RuntimeTypeAdapterFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -46,12 +45,12 @@ public class ClientConn extends Thread {
     @Override
     public void run() {
         connectionAlive = true;
-        String serverMsg;
+        String serverMessage;
         while (connectionAlive) {
             try {
-                serverMsg  = reader.readLine();
-                if (serverMsg != null) {
-                    parseJSON(serverMsg);
+                serverMessage  = reader.readLine();
+                if (serverMessage != null) {
+                    parseJSON(serverMessage);
                 } else {
                     connectionAlive = false;
                 }
@@ -65,9 +64,9 @@ public class ClientConn extends Thread {
     }
 
 
-    public void parseJSON(String serverMsg) {
+    public void parseJSON(String jsonText) {
 
-        Packet.ToClient serverMessage = gson.fromJson(serverMsg, Packet.ToClient.class);
+        Packet.ToClient serverMessage = gson.fromJson(jsonText, Packet.ToClient.class);
 
         if (serverMessage instanceof Packet.NewIdentity) {
             Packet.NewIdentity newIdentityMessage = (Packet.NewIdentity) serverMessage;
@@ -106,7 +105,6 @@ public class ClientConn extends Thread {
         }
 
         if (serverMessage instanceof Packet.RoomContents) {
-            System.out.println("received roomcontent message");
             Packet.RoomContents roomContentsMessage = (Packet.RoomContents) serverMessage;
             String[] data = gson.fromJson(roomContentsMessage.getIdentities(), String[].class);
 

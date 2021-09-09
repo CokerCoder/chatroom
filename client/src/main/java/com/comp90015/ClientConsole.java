@@ -41,7 +41,7 @@ public class ClientConsole extends Thread {
     public void run() {
         System.out.println(this.client);
         connectionAlive = true;
-        String consoleMsg;
+        String consoleMessage;
 
         // wait until has been assigned an identity by the server (handled by the ClientConn class)
         while (true) {
@@ -66,9 +66,9 @@ public class ClientConsole extends Thread {
                 Thread.sleep(100);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
 //                }
-                consoleMsg = reader.readLine();
-                if (consoleMsg != null) {
-                    parse(consoleMsg);
+                consoleMessage = reader.readLine();
+                if (consoleMessage != null) {
+                    parse(consoleMessage);
                 } else {
                     connectionAlive = false;
                 }

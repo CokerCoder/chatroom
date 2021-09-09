@@ -1,7 +1,6 @@
 package com.comp90015;
 
 import com.comp90015.base.ChatRoom;
-
 import com.comp90015.base.Packet;
 import com.google.gson.Gson;
 
@@ -9,9 +8,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 
@@ -25,23 +25,23 @@ public class Server {
     // JSON Parser
     private final Gson gson = new Gson();
 
-    private List<ChatRoom> chatRooms = new ArrayList<>();
+    private Map<String, List<ServerConn>> rooms = new ConcurrentHashMap<>();
 
-    // room list with room id with key and initialize with a empty "Main Hall"
-    private Map<String, List<ServerConn>> rooms = new HashMap<String, List<ServerConn>>() {{
-        put("MainHall", new ArrayList<ServerConn>());
-    }};
+    public Map<String, String> getOwners() {
+        return owners;
+    }
 
-    // room owner list with room id with key and initialize with a empty "Main Hall"
-    private Map<String, String> owners = new HashMap<>() {{
-        put("MainHall", "");
-    }};
+    private Map<String, String> owners = new ConcurrentHashMap<>();
+
 
     // TODO: number list keep track of the least unused number
 
 
     public Server(int port) {
         this.port = port;
+        // initialize MainHall
+        rooms.put("MainHall", new ArrayList<>());
+        owners.put("MainHall", "");
     }
 
     /*
@@ -53,34 +53,46 @@ public class Server {
         alive = true;
         try {
             serverSocket = new ServerSocket(port);
-            System.out.println("com.comp90015.Server has started, listening on port " + port + "...");
+            System.out.println("Server has started, listening on port " + port + "...");
             while (alive) {
 
+                // received new connection and make a new thread for it
                 Socket socket = serverSocket.accept();
 
                 ServerConn serverConn = new ServerConn(this, socket);
                 serverConn.start();
 
+                // a new guest is connected
+                // make a new thread and assign a new identity
+                String newId = UUID.randomUUID().toString();
+                serverConn.setIdentity(newId);
+
+                // the server sends some initial messages to the client
+                Packet.ToClient serverMessage;
+                serverMessage = new Packet.NewIdentity("", newId);
+                serverConn.sendMessage(gson.toJson(serverMessage));
+
                 // let the guest join Main Hall by default
                 joinRoom(serverConn, "MainHall");
                 System.out.println("all rooms: " + listRooms());
+
+                // the server send some initial messages to the client
+                serverMessage = new Packet.RoomChange(newId, "", "MainHall");
+                serverConn.sendMessage(gson.toJson(serverMessage));
+
+                serverMessage = new Packet.RoomList(listRooms());
+                serverConn.sendMessage(gson.toJson(serverMessage));
+
+                serverMessage = new Packet.RoomContents("MainHall", listGuests("MainHall"), "");
+                serverConn.sendMessage(gson.toJson(serverMessage));
 
             }
         } catch (IOException e) {
             System.out.println("Error creating socket...");
             e.printStackTrace();
         } finally {
-            System.out.println("com.comp90015.Server has stopped...");
+            System.out.println("Server has stopped...");
             close();
-        }
-    }
-
-    public void broadcast(Packet.ToClient toClientMessage, String roomid, ServerConn ignored) {
-        synchronized (rooms) {
-            for (com.comp90015.ServerConn conn : rooms.get(roomid)) {
-                if (ignored == null || !ignored.equals(conn))
-                    conn.sendMessage(gson.toJson(toClientMessage));
-            }
         }
     }
 
@@ -95,6 +107,15 @@ public class Server {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+
+
+    public void broadcast(Packet.ToClient toClientMessage, String roomid, ServerConn ignored) {
+        for (ServerConn conn : rooms.get(roomid)) {
+            if (ignored == null || !ignored.equals(conn))
+                conn.sendMessage(gson.toJson(toClientMessage));
         }
     }
 
@@ -123,16 +144,11 @@ public class Server {
     }
 
     /*
-     * Let the given guest join the given room, synchronize operation
+     * Let the given guest join the given room
      * */
-    public synchronized boolean joinRoom(ServerConn guest, String roomid) {
-        boolean exist = false;
-        for (var entry : rooms.entrySet()) {
-            if (roomid.equals(entry.getKey())) {
-                exist = true;
-            }
-        }
-        if (!exist) return false;
+    public boolean joinRoom(ServerConn guest, String roomid) {
+
+        if (!rooms.containsKey(roomid)) return false;
 
         if (guest.getRoomid()!=null) {
             // remove guest from the previous room
@@ -146,18 +162,11 @@ public class Server {
         rooms.put(roomid, guests);
         guest.setRoomid(roomid);
 
-        // if moving to the MainHall, send room content
-        if (roomid == "MainHall") {
-            Packet.ToClient serverMessage = new Packet.RoomContents(roomid,
-                    listGuests(roomid), "");
-            guest.sendMessage(gson.toJson(serverMessage));
-        }
-
         System.out.println("User-" + guest.getIdentity() + " joined chat room: " + roomid);
         return true;
     }
 
-    public synchronized boolean isValidIdentity(String newIdentity) {
+    public boolean isValidIdentity(String newIdentity) {
         if (!isValidName(newIdentity)) {
             return false;
         }
@@ -171,7 +180,7 @@ public class Server {
         return true;
     }
 
-    public synchronized boolean isValidRoomid(String roomid) {
+    public boolean isValidRoomid(String roomid) {
         if (!isValidName(roomid)) {
             return false;
         }
@@ -190,6 +199,7 @@ public class Server {
     }
 
     public void createRoom(String roomid, String owner) {
-        rooms.put(roomid, new ArrayList<ServerConn>());
+        rooms.put(roomid, new ArrayList<>());
+        owners.put(roomid, owner);
     }
 }

@@ -2,7 +2,5 @@ com/comp90015/ServerConn.java
  com.comp90015.ServerConn
 com/comp90015/Server.java
  com.comp90015.Server
- com.comp90015.Server$1
- com.comp90015.Server$2
 com/comp90015/ServerEntry.java
  com.comp90015.ServerEntry

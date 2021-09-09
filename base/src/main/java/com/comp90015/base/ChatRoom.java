@@ -1,16 +1,20 @@
 package com.comp90015.base;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChatRoom {
 
     private String roomid;
+//    private String owner;
     private int count;
-
-    private String owner;
+//    private List<String> guests;
 
     public ChatRoom(String roomid, int count) {
         this.roomid = roomid;
-        this.count = count;
 //        this.owner = owner;
+        this.count = count;
+//        this.guests = new ArrayList<>();
     }
 
     public String getRoomid() {
@@ -35,5 +39,13 @@ public class ChatRoom {
 //
 //    public void setOwner(String owner) {
 //        this.owner = owner;
+//    }
+//
+//    public List<String> getGuests() {
+//        return guests;
+//    }
+//
+//    public void setGuests(List<String> guests) {
+//        this.guests = guests;
 //    }
 }

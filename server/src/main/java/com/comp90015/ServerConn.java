@@ -2,7 +2,6 @@ package com.comp90015;
 
 import com.comp90015.base.Packet;
 import com.comp90015.base.RuntimeTypeAdapterFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.UUID;
 
 
 public class ServerConn extends Thread {
@@ -52,30 +50,13 @@ public class ServerConn extends Thread {
      * Run method keeps listening on the reader of the socket for the message sent from the client
      * */
     public void run() {
-
-        // a new guest is connected
-        // make a new thread and assign a new identity
-        String newId = UUID.randomUUID().toString();
-        this.identity = newId;
-
-        // the server sends some initial messages to the client
-        Packet.ToClient serverMessage;
-        serverMessage = new Packet.NewIdentity("", newId);
-        sendMessage(gson.toJson(serverMessage));
-
-        serverMessage = new Packet.RoomChange(newId, "", "MainHall");
-        sendMessage(gson.toJson(serverMessage));
-
-        serverMessage = new Packet.RoomList(server.listRooms());
-        sendMessage(gson.toJson(serverMessage));
-
         connectionAlive = true;
-        String in;
+        String clientMessage;
         while (connectionAlive) {
             try {
-                in  = reader.readLine();
-                if (in != null) {
-                    parseJSON(in);
+                clientMessage  = reader.readLine();
+                if (clientMessage != null) {
+                    parseJSON(clientMessage);
                 } else {
                     connectionAlive = false;
                 }
@@ -136,12 +117,20 @@ public class ServerConn extends Thread {
             }
             serverMessage = new Packet.RoomChange(identity, former, roomid);
             sendMessage(gson.toJson(serverMessage));
+            if (roomid.equals("MainHall")) {
+                serverMessage = new Packet.RoomContents("MainHall",
+                        server.listGuests("MainHall"),
+                        "");
+                sendMessage(gson.toJson(serverMessage));
+            }
         }
 
         if (clientMessage instanceof Packet.Who) {
             Packet.Who whoMessage = (Packet.Who) clientMessage;
+            String guests = server.listGuests(whoMessage.getRoomid());
+            if (guests.length()==0) return;
             serverMessage = new Packet.RoomContents(whoMessage.getRoomid(),
-                    server.listGuests(whoMessage.getRoomid()), "");
+                    guests, server.getOwners().get(whoMessage.getRoomid()));
             sendMessage(gson.toJson(serverMessage));
         }
 
