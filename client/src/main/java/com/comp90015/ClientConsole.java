@@ -21,12 +21,12 @@ public class ClientConsole extends Thread {
     // No need to deserialize JSON string in this class, only serialize
     private final Gson gson = new Gson();
 
-    private Client client;
-    private Socket socket;
+    private final Client client;
+    private final Socket socket;
 
     // write to the socket
-    private BufferedReader reader; // read from console
-    private PrintWriter writer; // write to the server
+    private final BufferedReader reader; // read from console
+    private final PrintWriter writer; // write to the server
 
     private boolean connectionAlive = false;
 
@@ -63,7 +63,7 @@ public class ClientConsole extends Thread {
 //                }
 //                synchronized (client) {
                 // TODO: Concurrency
-                Thread.sleep(100);
+                Thread.sleep(10);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
 //                }
                 consoleMessage = reader.readLine();

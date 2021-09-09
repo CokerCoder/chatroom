@@ -6,8 +6,8 @@ import java.net.Socket;
 
 public class Client {
 
-    private String host;
-    private int port;
+    private final String host;
+    private final int port;
 
     // make sure the ClientConsole can read any update made by ClientConn
     private volatile String roomid;
@@ -38,10 +38,6 @@ public class Client {
 
     public String getHost() {
         return host;
-    }
-
-    public int getPort() {
-        return port;
     }
 
     public String getRoomid() {

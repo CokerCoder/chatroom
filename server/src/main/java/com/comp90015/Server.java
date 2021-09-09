@@ -25,13 +25,13 @@ public class Server {
     // JSON Parser
     private final Gson gson = new Gson();
 
-    private Map<String, List<ServerConn>> rooms = new ConcurrentHashMap<>();
+    private final Map<String, List<ServerConn>> rooms = new ConcurrentHashMap<>();
 
     public Map<String, String> getOwners() {
         return owners;
     }
 
-    private Map<String, String> owners = new ConcurrentHashMap<>();
+    private final Map<String, String> owners = new ConcurrentHashMap<>();
 
 
     // TODO: number list keep track of the least unused number
@@ -185,7 +185,7 @@ public class Server {
             return false;
         }
         for (var entry : rooms.entrySet()) {
-            if (roomid == entry.getKey()) {
+            if (roomid.equals(entry.getKey())) {
                 return false;
             }
         }

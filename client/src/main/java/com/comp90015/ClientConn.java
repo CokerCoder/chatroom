@@ -29,10 +29,10 @@ public class ClientConn extends Thread {
             .registerTypeAdapterFactory(runtimeTypeAdapterFactory)
             .create();
 
-    private Client client;
-    private Socket socket;
+    private final Client client;
+    private final Socket socket;
 
-    private BufferedReader reader; // read from server
+    private final BufferedReader reader; // read from server
 
     private boolean connectionAlive = false;
 

@@ -14,10 +14,10 @@ import java.net.Socket;
 
 public class ServerConn extends Thread {
 
-    private Server server;
-    private Socket socket;
-    private BufferedReader reader;
-    private PrintWriter writer;
+    private final Server server;
+    private final Socket socket;
+    private final BufferedReader reader;
+    private final PrintWriter writer;
     private boolean connectionAlive = false;
 
     private String identity;
@@ -93,7 +93,7 @@ public class ServerConn extends Thread {
 
         Packet.ToServer clientMessage = gson.fromJson(jsonText, Packet.ToServer.class);
 
-        Packet.ToClient serverMessage = null;
+        Packet.ToClient serverMessage;
 
         if (clientMessage instanceof Packet.IdentityChange) {
             Packet.IdentityChange identityChangeMessage = (Packet.IdentityChange) clientMessage;
