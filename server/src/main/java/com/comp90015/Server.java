@@ -80,10 +80,10 @@ public class Server {
                 serverMessage = new Packet.RoomChange(newId, "", "MainHall");
                 serverConn.sendMessage(gson.toJson(serverMessage));
 
-                serverMessage = new Packet.RoomList(listRooms());
+                serverMessage = new Packet.RoomContents("MainHall", listGuests("MainHall"), "");
                 serverConn.sendMessage(gson.toJson(serverMessage));
 
-                serverMessage = new Packet.RoomContents("MainHall", listGuests("MainHall"), "");
+                serverMessage = new Packet.RoomList(listRooms());
                 serverConn.sendMessage(gson.toJson(serverMessage));
 
             }
