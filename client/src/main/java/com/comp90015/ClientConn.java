@@ -119,10 +119,26 @@ public class ClientConn extends Thread {
         }
 
         if (serverMessage instanceof Packet.RoomList) {
+
             Packet.RoomList roomListMessage = (Packet.RoomList) serverMessage;
             ChatRoom[] data = gson.fromJson(roomListMessage.getRooms(), ChatRoom[].class);
-            for (ChatRoom chatRoom : data) {
-                System.out.format("%s: %d guests\n", chatRoom.getRoomid(), chatRoom.getCount());
+
+            if (client.getCreatingRoom()!=null) {
+                // the client requested a room creation
+                for (ChatRoom chatRoom : data) {
+                    if (chatRoom.getRoomid().equals(client.getCreatingRoom())) {
+                        System.out.format("Room %s created.\n", client.getCreatingRoom());
+                        client.setCreatingRoom(null);
+                        return;
+                    }
+                }
+                System.out.format("Room %s is invalid or already in use.\n", client.getCreatingRoom());
+                client.setCreatingRoom(null);
+            } else {
+                // display the relevant information only when the client isn't requesting creating room
+                for (ChatRoom chatRoom : data) {
+                    System.out.format("%s: %d guests\n", chatRoom.getRoomid(), chatRoom.getCount());
+                }
             }
         }
     }

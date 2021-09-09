@@ -1,5 +1,6 @@
 package com.comp90015;
 
+import com.comp90015.base.ChatRoom;
 import com.comp90015.base.Packet;
 import com.comp90015.base.RuntimeTypeAdapterFactory;
 import com.google.gson.Gson;
@@ -10,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 public class ServerConn extends Thread {
@@ -152,8 +156,19 @@ public class ServerConn extends Thread {
             String roomid = createRoomMessage.getRoomid();
             if (server.isValidRoomid(roomid)) {
                 server.createRoom(roomid, this.identity);
+                serverMessage = new Packet.RoomList(server.listRooms());
+            } else {
+                // if the room is not valid (especially already in use)
+                // adopt Luke's suggestion to firstly remove it from the list and then send
+                List<ChatRoom> data = new ArrayList<>();
+                for (Map.Entry<String, List<ServerConn>> entry: server.getRooms().entrySet()) {
+                    if (!entry.getKey().equals(roomid)) {
+                        ChatRoom room = new ChatRoom(entry.getKey(), entry.getValue().size());
+                        data.add(room);
+                    }
+                }
+                serverMessage = new Packet.RoomList(gson.toJson(data));
             }
-            serverMessage = new Packet.RoomList(server.listRooms());
             sendMessage(gson.toJson(serverMessage));
         }
     }

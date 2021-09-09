@@ -13,6 +13,17 @@ public class Client {
     private volatile String roomid;
     private volatile String identity;
 
+    public String getCreatingRoom() {
+        return creatingRoom;
+    }
+
+    public void setCreatingRoom(String creatingRoom) {
+        this.creatingRoom = creatingRoom;
+    }
+
+    // this field is to check if a room is successfully created by the server
+    private volatile String creatingRoom = null;
+
     public Client(String host, int port) {
         this.host = host;
         this.port = port;

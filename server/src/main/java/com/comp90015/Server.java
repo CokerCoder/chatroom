@@ -25,6 +25,10 @@ public class Server {
     // JSON Parser
     private final Gson gson = new Gson();
 
+    public Map<String, List<ServerConn>> getRooms() {
+        return rooms;
+    }
+
     private final Map<String, List<ServerConn>> rooms = new ConcurrentHashMap<>();
 
     public Map<String, String> getOwners() {

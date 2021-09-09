@@ -136,6 +136,7 @@ public class ClientConsole extends Thread {
             case "createroom":
                 if (words.length > 1) {
                     toServerMessage = new Packet.CreateRoom(words[1]);
+                    client.setCreatingRoom(words[1]);
                 } else {
                     System.out.println("Invalid command");
                 }
