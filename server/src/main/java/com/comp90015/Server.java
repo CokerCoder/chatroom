@@ -206,4 +206,13 @@ public class Server {
         rooms.put(roomid, new ArrayList<>());
         owners.put(roomid, owner);
     }
+
+    public void quit(String roomid, ServerConn guest) {
+        rooms.get(roomid).remove(guest);
+        for (Map.Entry<String, String> entry: owners.entrySet()) {
+            if (entry.getValue().equals(guest.getIdentity())) {
+                entry.setValue("");
+            }
+        }
+    }
 }

@@ -63,6 +63,7 @@ public class ClientConsole extends Thread {
 //                }
 //                synchronized (client) {
                 // TODO: Concurrency
+                if (client.isQuitting()) connectionAlive = false;
                 Thread.sleep(10);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
 //                }
@@ -142,6 +143,7 @@ public class ClientConsole extends Thread {
                 }
                 break;
             case "quit":
+                client.setQuitting(true);
                 toServerMessage = new Packet.Quit();
                 sendMessage(gson.toJson(toServerMessage));
                 connectionAlive = false;

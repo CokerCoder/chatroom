@@ -171,6 +171,13 @@ public class ServerConn extends Thread {
             }
             sendMessage(gson.toJson(serverMessage));
         }
+
+        if (clientMessage instanceof Packet.Quit) {
+            serverMessage = new Packet.RoomChange(identity, roomid, "");
+            server.broadcast(serverMessage, roomid, null);
+            server.quit(roomid, this);
+            close();
+        }
     }
 
     public String getIdentity() {

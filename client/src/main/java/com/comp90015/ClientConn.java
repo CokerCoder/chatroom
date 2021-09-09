@@ -48,6 +48,7 @@ public class ClientConn extends Thread {
         String serverMessage;
         while (connectionAlive) {
             try {
+                if (client.isQuitting()) connectionAlive = false;
                 serverMessage  = reader.readLine();
                 if (serverMessage != null) {
                     parseJSON(serverMessage);
@@ -92,7 +93,9 @@ public class ClientConn extends Thread {
         if (serverMessage instanceof Packet.RoomChange) {
             Packet.RoomChange roomChangeMessage = ((Packet.RoomChange) serverMessage);
             if (!roomChangeMessage.getFormer().equals(roomChangeMessage.getRoomid())) {
-                client.setRoomid(roomChangeMessage.getRoomid());
+                if (roomChangeMessage.getIdentity().equals(client.getIdentity())) {
+                    client.setRoomid(roomChangeMessage.getRoomid());
+                }
                 if (roomChangeMessage.getFormer().length() > 0) {
                     System.out.format("%s moved from %s to %s\n",
                             client.getIdentity(),

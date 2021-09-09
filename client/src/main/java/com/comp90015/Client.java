@@ -13,16 +13,11 @@ public class Client {
     private volatile String roomid;
     private volatile String identity;
 
-    public String getCreatingRoom() {
-        return creatingRoom;
-    }
-
-    public void setCreatingRoom(String creatingRoom) {
-        this.creatingRoom = creatingRoom;
-    }
-
     // this field is to check if a room is successfully created by the server
     private volatile String creatingRoom = null;
+
+    private volatile boolean quitting = false;
+
 
     public Client(String host, int port) {
         this.host = host;
@@ -44,7 +39,6 @@ public class Client {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-
     }
 
     public String getHost() {
@@ -65,5 +59,21 @@ public class Client {
 
     public void setIdentity(String identity) {
         this.identity = identity;
+    }
+
+    public String getCreatingRoom() {
+        return creatingRoom;
+    }
+
+    public void setCreatingRoom(String creatingRoom) {
+        this.creatingRoom = creatingRoom;
+    }
+
+    public boolean isQuitting() {
+        return quitting;
+    }
+
+    public void setQuitting(boolean quitting) {
+        this.quitting = quitting;
     }
 }
