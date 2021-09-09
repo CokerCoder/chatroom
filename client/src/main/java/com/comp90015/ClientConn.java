@@ -97,10 +97,16 @@ public class ClientConn extends Thread {
                     client.setRoomid(roomChangeMessage.getRoomid());
                 }
                 if (roomChangeMessage.getFormer().length() > 0) {
-                    System.out.format("%s moved from %s to %s\n",
-                            client.getIdentity(),
-                            roomChangeMessage.getFormer(),
-                            roomChangeMessage.getRoomid());
+                    if (roomChangeMessage.getRoomid().equals("")) {
+                        System.out.format("%s leaves %s\n",
+                                client.getIdentity(),
+                                roomChangeMessage.getFormer());
+                    } else {
+                        System.out.format("%s moved from %s to %s\n",
+                                client.getIdentity(),
+                                roomChangeMessage.getFormer(),
+                                roomChangeMessage.getRoomid());
+                    }
                 }
             } else {
                 System.out.println("The requested room is invalid or non existent.");
