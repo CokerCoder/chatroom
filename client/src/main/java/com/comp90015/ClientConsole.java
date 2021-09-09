@@ -63,7 +63,10 @@ public class ClientConsole extends Thread {
 //                }
 //                synchronized (client) {
                 // TODO: Concurrency
-                if (client.isQuitting()) connectionAlive = false;
+                if (client.isQuitting()) {
+                    connectionAlive = false;
+                    return;
+                }
                 Thread.sleep(10);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
 //                }
@@ -96,7 +99,6 @@ public class ClientConsole extends Thread {
 
     public void parseMessage(String text) {
         Packet.ToSMessage clientMessage = new Packet.ToSMessage(text);
-        System.out.println(gson.toJson(clientMessage));
         sendMessage(gson.toJson(clientMessage));
     }
 
@@ -145,9 +147,16 @@ public class ClientConsole extends Thread {
             case "quit":
                 client.setQuitting(true);
                 toServerMessage = new Packet.Quit();
-                sendMessage(gson.toJson(toServerMessage));
-                connectionAlive = false;
-                return;
+                break;
+            case "delete":
+                if (words.length > 1) {
+                    toServerMessage = new Packet.Delete(words[1]);
+                } else {
+                    System.out.println("Invalid command");
+                }
+                break;
+            default:
+                System.out.println("Invalid command");
         }
         sendMessage(gson.toJson(toServerMessage));
     }

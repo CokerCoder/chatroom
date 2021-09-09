@@ -105,7 +105,17 @@ public class ServerConn extends Thread {
             if (server.isValidIdentity(newIdentity)) {
                 serverMessage = new Packet.NewIdentity(identity, newIdentity);
                 server.broadcast(serverMessage, roomid, null);
+
+                // check if there is any room owned by this client
+                // if so change the corresponding owner name to the new one
+                for (Map.Entry<String, String> entry: server.getOwners().entrySet()) {
+                    if (entry.getValue().equals(identity)) {
+                        entry.setValue(newIdentity);
+                    }
+                }
+
                 this.identity = identityChangeMessage.getIdentity();
+
             } else {
                 serverMessage = new Packet.NewIdentity(identity, identity);
                 sendMessage(gson.toJson(serverMessage));
@@ -176,8 +186,23 @@ public class ServerConn extends Thread {
             serverMessage = new Packet.RoomChange(identity, roomid, "");
             server.broadcast(serverMessage, roomid, null);
             server.quit(roomid, this);
+            // check if there is any room owned by this client
+            // if so change the corresponding owner name to empty string
+            for (Map.Entry<String, String> entry: server.getOwners().entrySet()) {
+                if (entry.getValue().equals(identity)) {
+                    entry.setValue("");
+                }
+            }
             close();
         }
+
+        // TODO: handle delete command
+//        if (clientMessage instanceof Packet.Delete) {
+//            // only delete the room if the request client is the owner
+//            if (server.getOwners().get(((Packet.Delete) clientMessage).getRoomid()).equals(identity)) {
+//
+//            }
+//        }
     }
 
     public String getIdentity() {

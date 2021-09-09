@@ -117,6 +117,11 @@ public class ClientConn extends Thread {
             Packet.RoomContents roomContentsMessage = (Packet.RoomContents) serverMessage;
             String[] data = gson.fromJson(roomContentsMessage.getIdentities(), String[].class);
 
+            if (data.length == 0) {
+                System.out.format("%s is empty.\n", roomContentsMessage.getRoomid());
+                return;
+            }
+
             System.out.format("%s contains", roomContentsMessage.getRoomid());
             for (String guest : data) {
                 System.out.print(" " + guest);
