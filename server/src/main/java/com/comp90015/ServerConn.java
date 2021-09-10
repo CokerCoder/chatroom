@@ -114,6 +114,17 @@ public class ServerConn extends Thread {
                     }
                 }
 
+                // if former identity is default ones, remove from the set
+                if (identity.startsWith("guest")) {
+                    if (identity.length() > 5) {
+                        String tail = identity.substring(5);
+                        try {
+                            int identityInt = Integer.parseInt(tail);
+                            server.getIds().remove(identityInt);
+                        } catch (NumberFormatException ignored) { }
+                    }
+                }
+
                 this.identity = identityChangeMessage.getIdentity();
 
             } else {
@@ -191,6 +202,16 @@ public class ServerConn extends Thread {
             for (Map.Entry<String, String> entry: server.getOwners().entrySet()) {
                 if (entry.getValue().equals(identity)) {
                     entry.setValue("");
+                }
+            }
+            // if former identity is default ones, remove from the set
+            if (identity.startsWith("guest")) {
+                if (identity.length() > 5) {
+                    String tail = identity.substring(5);
+                    try {
+                        int identityInt = Integer.parseInt(tail);
+                        server.getIds().remove(identityInt);
+                    } catch (NumberFormatException ignored) { }
                 }
             }
             close();

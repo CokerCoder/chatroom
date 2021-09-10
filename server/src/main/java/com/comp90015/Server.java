@@ -7,10 +7,7 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -37,9 +34,12 @@ public class Server {
 
     private final Map<String, String> owners = new ConcurrentHashMap<>();
 
+    public Set<Integer> getIds() {
+        return ids;
+    }
 
-    // TODO: number list keep track of the least unused number
-
+    // Concurrent hashset to store the ids
+    private final Set<Integer> ids = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
 
     public Server(int port) {
         this.port = port;
@@ -68,8 +68,15 @@ public class Server {
 
                 // a new guest is connected
                 // make a new thread and assign a new identity
-                String newId = UUID.randomUUID().toString();
-                serverConn.setIdentity(newId);
+                String newId;
+                for (int i=1;;i++) {
+                    if (!ids.contains(i)) {
+                        newId = "guest"+i;
+                        serverConn.setIdentity(newId);
+                        ids.add(i);
+                        break;
+                    }
+                }
 
                 // the server sends some initial messages to the client
                 Packet.ToClient serverMessage;
@@ -179,6 +186,21 @@ public class Server {
                 if (serverConn.getIdentity().equals(newIdentity)) {
                     return false;
                 }
+            }
+        }
+        // make sure new identity cannot be the same as "guestx"
+        if (newIdentity.startsWith("guest")) {
+            if (newIdentity.length() > 5) {
+                String tail = newIdentity.substring(5);
+                try {
+                    int newIdentityInt = Integer.parseInt(tail);
+                    if (ids.contains(newIdentityInt)) {
+                        return false;
+                    } else {
+                        // if changing to guestx
+                        ids.add(newIdentityInt);
+                    }
+                } catch (NumberFormatException ignored) { }
             }
         }
         return true;
