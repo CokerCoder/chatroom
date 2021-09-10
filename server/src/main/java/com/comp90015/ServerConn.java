@@ -115,16 +115,7 @@ public class ServerConn extends Thread {
                 }
 
                 // if former identity is default ones, remove from the set
-                if (identity.startsWith("guest")) {
-                    if (identity.length() > 5) {
-                        String tail = identity.substring(5);
-                        try {
-                            int identityInt = Integer.parseInt(tail);
-                            server.getIds().remove(identityInt);
-                        } catch (NumberFormatException ignored) { }
-                    }
-                }
-
+                handleGuestId();
                 this.identity = identityChangeMessage.getIdentity();
 
             } else {
@@ -205,15 +196,7 @@ public class ServerConn extends Thread {
                 }
             }
             // if former identity is default ones, remove from the set
-            if (identity.startsWith("guest")) {
-                if (identity.length() > 5) {
-                    String tail = identity.substring(5);
-                    try {
-                        int identityInt = Integer.parseInt(tail);
-                        server.getIds().remove(identityInt);
-                    } catch (NumberFormatException ignored) { }
-                }
-            }
+            handleGuestId();
             close();
         }
 
@@ -224,6 +207,18 @@ public class ServerConn extends Thread {
 //
 //            }
 //        }
+    }
+
+    private void handleGuestId() {
+        if (identity.startsWith("guest")) {
+            if (identity.length() > 5) {
+                String tail = identity.substring(5);
+                try {
+                    int identityInt = Integer.parseInt(tail);
+                    server.getIds().remove(identityInt);
+                } catch (NumberFormatException ignored) { }
+            }
+        }
     }
 
     public String getIdentity() {
