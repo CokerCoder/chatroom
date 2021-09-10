@@ -12,6 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 
+/**
+ * The Server side for the client-server architecture chatroom
+ * @author Yunfei Jing
+ * @version 1.0.0
+ */
 public class Server {
 
     private final int port;
@@ -48,11 +53,11 @@ public class Server {
         owners.put("MainHall", "");
     }
 
-    /*
-     * Handle (listen) for connection
-     * For each connected client make a new thread to handle its request
-     * TODO: change to thread pool
-     * */
+
+    /**
+     * Handle method for listening for connections made by the client,
+     * for each connected client make a new thread to handle its request.
+     */
     public void handle() {
         alive = true;
         try {
@@ -62,6 +67,8 @@ public class Server {
 
                 // received new connection and make a new thread for it
                 Socket socket = serverSocket.accept();
+
+                // TODO: change to thread pool
 
                 ServerConn serverConn = new ServerConn(this, socket);
                 serverConn.start();
@@ -107,9 +114,10 @@ public class Server {
         }
     }
 
-    /*
-     * Close the current server socket
-     * */
+
+    /**
+     * Close the current server socket.
+     */
     private void close() {
         try {
             alive = false;
@@ -122,7 +130,12 @@ public class Server {
     }
 
 
-
+    /**
+     * Broadcast the message to all the clients in the current room
+     * @param toClientMessage message to be broadcast
+     * @param roomid room id to be broadcast in
+     * @param ignored the client who send the message, should be ignored when broadcast
+     */
     public void broadcast(Packet.ToClient toClientMessage, String roomid, ServerConn ignored) {
         for (ServerConn conn : rooms.get(roomid)) {
             if (ignored == null || !ignored.equals(conn))
@@ -130,9 +143,10 @@ public class Server {
         }
     }
 
-    /*
-     * List all the current active chat rooms
-     * */
+    /**
+     * List all the current active chat rooms.
+     * @return all the rooms with size in JSON format string
+     */
     public String listRooms() {
         List<ChatRoom> data = new ArrayList<>();
         for (Map.Entry<String, List<ServerConn>> entry: rooms.entrySet()) {
@@ -142,9 +156,11 @@ public class Server {
         return gson.toJson(data);
     }
 
-    /*
-    * List all the guests connected in the given room
-    * */
+    /**
+     * List all the guests connected in the given room.
+     * @param roomid room id to be look up
+     * @return all the guests in the given room in JSON format string
+     */
     public String listGuests(String roomid) {
         if (!rooms.containsKey(roomid)) return "";
         List<String> data = new ArrayList<>();
@@ -154,9 +170,13 @@ public class Server {
         return gson.toJson(data);
     }
 
-    /*
-     * Let the given guest join the given room
-     * */
+
+    /**
+     * Let the given guest join the given room.
+     * @param guest guest to be joined
+     * @param roomid room id to be joined
+     * @return whether the guest joined the room successfully
+     */
     public boolean joinRoom(ServerConn guest, String roomid) {
 
         if (!rooms.containsKey(roomid)) return false;
@@ -177,6 +197,12 @@ public class Server {
         return true;
     }
 
+
+    /**
+     * Validate if a string is valid for an identity.
+     * @param newIdentity given identity for checking
+     * @return valid or not
+     */
     public boolean isValidIdentity(String newIdentity) {
         if (!isValidName(newIdentity)) {
             return false;
@@ -206,6 +232,12 @@ public class Server {
         return true;
     }
 
+
+    /**
+     * Validate if a string is valid for a room id.
+     * @param roomid given room id for checking
+     * @return valid or not
+     */
     public boolean isValidRoomid(String roomid) {
         if (!isValidName(roomid)) {
             return false;
@@ -218,17 +250,35 @@ public class Server {
         return true;
     }
 
+
+    /**
+     * Validate if a string is valid in alphabetic constraint for a new identity.
+     * @param name given identity name for checking
+     * @return valid or not
+     */
     public boolean isValidName(String name) {
         Pattern p = Pattern.compile("[^a-zA-Z0-9]");
         boolean hasSpecialChar = p.matcher(name).find();
         return (!hasSpecialChar && name.length() <= 16 && name.length() >= 3);
     }
 
+
+    /**
+     * Create a room
+     * @param roomid room id to be created
+     * @param owner the name of the creator
+     */
     public void createRoom(String roomid, String owner) {
         rooms.put(roomid, new ArrayList<>());
         owners.put(roomid, owner);
     }
 
+
+    /**
+     * Disconnect a guest from the server.
+     * @param roomid current room the guest is in
+     * @param guest guest to be removed
+     */
     public void quit(String roomid, ServerConn guest) {
         rooms.get(roomid).remove(guest);
         for (Map.Entry<String, String> entry: owners.entrySet()) {
