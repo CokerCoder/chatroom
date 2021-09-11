@@ -15,32 +15,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 public class ServerConn extends Thread {
 
     private final Server server;
     private final Socket socket;
     private final BufferedReader reader;
     private final PrintWriter writer;
-    private boolean connectionAlive = false;
 
     private String identity;
     private String roomid;
 
     RuntimeTypeAdapterFactory<Packet.ToServer> runtimeTypeAdapterFactory = RuntimeTypeAdapterFactory
-            .of(Packet.ToServer.class, "type")
-            .registerSubtype(Packet.IdentityChange.class, "identitychange")
-            .registerSubtype(Packet.Join.class, "join")
-            .registerSubtype(Packet.Who.class, "who")
-            .registerSubtype(Packet.List.class, "list")
-            .registerSubtype(Packet.CreateRoom.class, "createroom")
-            .registerSubtype(Packet.Delete.class, "delete")
-            .registerSubtype(Packet.Quit.class, "quit")
+            .of(Packet.ToServer.class, "type").registerSubtype(Packet.IdentityChange.class, "identitychange")
+            .registerSubtype(Packet.Join.class, "join").registerSubtype(Packet.Who.class, "who")
+            .registerSubtype(Packet.List.class, "list").registerSubtype(Packet.CreateRoom.class, "createroom")
+            .registerSubtype(Packet.Delete.class, "delete").registerSubtype(Packet.Quit.class, "quit")
             .registerSubtype(Packet.ToSMessage.class, "message");
 
-    Gson gson = new GsonBuilder()
-            .registerTypeAdapterFactory(runtimeTypeAdapterFactory)
-            .create();
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(runtimeTypeAdapterFactory).create();
 
     public ServerConn(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -51,22 +43,23 @@ public class ServerConn extends Thread {
 
     @Override
     /*
-     * Run method keeps listening on the reader of the socket for the message sent from the client
-     * */
+     * Run method keeps listening on the reader of the socket for the message sent
+     * from the client
+     */
     public void run() {
-        connectionAlive = true;
+        boolean connectionAlive = true;
         String clientMessage;
         while (connectionAlive) {
             try {
-                clientMessage  = reader.readLine();
-                if (clientMessage != null) {
-                    parseJSON(clientMessage);
-                } else {
-                    connectionAlive = false;
+                clientMessage = reader.readLine();
+                // detect if the client disconnected without sending the quit command
+                if (clientMessage == null) {
+                    closeConnection();
                 }
+                parseJSON(clientMessage);
             } catch (IOException e) {
                 connectionAlive = false;
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
                 close();
             }
         }
@@ -75,20 +68,20 @@ public class ServerConn extends Thread {
 
     /*
      * Close the server connection thread
-     * */
+     */
     public void close() {
         try {
             socket.close();
             reader.close();
             writer.close();
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
     /*
      * Send the message to the client
-     * */
+     */
     public void sendMessage(String message) {
         writer.println(message);
     }
@@ -108,7 +101,7 @@ public class ServerConn extends Thread {
 
                 // check if there is any room owned by this client
                 // if so change the corresponding owner name to the new one
-                for (Map.Entry<String, String> entry: server.getOwners().entrySet()) {
+                for (Map.Entry<String, String> entry : server.getOwners().entrySet()) {
                     if (entry.getValue().equals(identity)) {
                         entry.setValue(newIdentity);
                     }
@@ -130,13 +123,21 @@ public class ServerConn extends Thread {
             boolean success = server.joinRoom(this, joinMessage.getRoomid());
             if (success) {
                 this.roomid = joinMessage.getRoomid();
+                // send room change message to all the connected clients in the room
+                for (ServerConn serverConn : server.getRooms().get(roomid)) {
+                    serverMessage = new Packet.RoomChange(identity, former, roomid);
+                    serverConn.sendMessage(gson.toJson(serverMessage));
+                }
+            } else {
+                serverMessage = new Packet.RoomChange(identity, former, roomid);
+                sendMessage(gson.toJson(serverMessage));
             }
-            serverMessage = new Packet.RoomChange(identity, former, roomid);
-            sendMessage(gson.toJson(serverMessage));
-            if (roomid.equals("MainHall")) {
-                serverMessage = new Packet.RoomContents("MainHall",
-                        server.listGuests("MainHall"),
-                        "");
+            // if changing to main hall, send additional information
+            if (roomid.equals("MainHall") && !former.equals(roomid)) {
+                serverMessage = new Packet.RoomContents("MainHall", server.listGuests("MainHall"), "");
+                sendMessage(gson.toJson(serverMessage));
+
+                serverMessage = new Packet.RoomList(server.listRooms());
                 sendMessage(gson.toJson(serverMessage));
             }
         }
@@ -144,9 +145,10 @@ public class ServerConn extends Thread {
         if (clientMessage instanceof Packet.Who) {
             Packet.Who whoMessage = (Packet.Who) clientMessage;
             String guests = server.listGuests(whoMessage.getRoomid());
-            if (guests.length()==0) return;
-            serverMessage = new Packet.RoomContents(whoMessage.getRoomid(),
-                    guests, server.getOwners().get(whoMessage.getRoomid()));
+            if (guests.length() == 0)
+                return;
+            serverMessage = new Packet.RoomContents(whoMessage.getRoomid(), guests,
+                    server.getOwners().get(whoMessage.getRoomid()));
             sendMessage(gson.toJson(serverMessage));
         }
 
@@ -173,7 +175,7 @@ public class ServerConn extends Thread {
                 // if the room is not valid (especially already in use)
                 // adopt Luke's suggestion to firstly remove it from the list and then send
                 List<ChatRoom> data = new ArrayList<>();
-                for (Map.Entry<String, List<ServerConn>> entry: server.getRooms().entrySet()) {
+                for (Map.Entry<String, List<ServerConn>> entry : server.getRooms().entrySet()) {
                     if (!entry.getKey().equals(roomid)) {
                         ChatRoom room = new ChatRoom(entry.getKey(), entry.getValue().size());
                         data.add(room);
@@ -185,28 +187,30 @@ public class ServerConn extends Thread {
         }
 
         if (clientMessage instanceof Packet.Quit) {
-            serverMessage = new Packet.RoomChange(identity, roomid, "");
-            server.broadcast(serverMessage, roomid, null);
-            server.quit(roomid, this);
-            // check if there is any room owned by this client
-            // if so change the corresponding owner name to empty string
-            for (Map.Entry<String, String> entry: server.getOwners().entrySet()) {
-                if (entry.getValue().equals(identity)) {
-                    entry.setValue("");
-                }
-            }
-            // if former identity is default ones, remove from the set
-            handleGuestId();
-            close();
+            closeConnection();
         }
 
-        // TODO: handle delete command
-//        if (clientMessage instanceof Packet.Delete) {
-//            // only delete the room if the request client is the owner
-//            if (server.getOwners().get(((Packet.Delete) clientMessage).getRoomid()).equals(identity)) {
-//
-//            }
-//        }
+        if (clientMessage instanceof Packet.Delete) {
+            Packet.Delete deleteMessage = (Packet.Delete) clientMessage;
+            // only delete the room if the request client is the owner
+            String toDelete = deleteMessage.getRoomid();
+            if (!server.getOwners().get(toDelete).equals(identity)) {
+                return;
+            }
+            // join each guest in the given room to MainHall
+            for (ServerConn guest : server.getRooms().get(toDelete)) {
+                guest.setRoomid("MainHall");
+                serverMessage = new Packet.RoomChange(guest.getIdentity(), toDelete, "MainHall");
+                guest.sendMessage(gson.toJson(serverMessage));
+                server.joinRoom(guest, "MainHall");
+            }
+
+            // remove the room
+            server.getRooms().remove(toDelete);
+
+            serverMessage = new Packet.RoomList(server.listRooms());
+            sendMessage(gson.toJson(serverMessage));
+        }
     }
 
     private void handleGuestId() {
@@ -216,9 +220,27 @@ public class ServerConn extends Thread {
                 try {
                     int identityInt = Integer.parseInt(tail);
                     server.getIds().remove(identityInt);
-                } catch (NumberFormatException ignored) { }
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
+    }
+
+    private void closeConnection() {
+        Packet.ToClient serverMessage;
+        serverMessage = new Packet.RoomChange(identity, roomid, "");
+        server.broadcast(serverMessage, roomid, null);
+        server.quit(roomid, this);
+        // check if there is any room owned by this client
+        // if so change the corresponding owner name to empty string
+        for (Map.Entry<String, String> entry : server.getOwners().entrySet()) {
+            if (entry.getValue().equals(identity)) {
+                entry.setValue("");
+            }
+        }
+        // if former identity is default ones, remove from the set
+        handleGuestId();
+        close();
     }
 
     public String getIdentity() {

@@ -1,7 +1,7 @@
-com/comp90015/ClientEntry.java
- com.comp90015.ClientEntry
 com/comp90015/ClientConn.java
  com.comp90015.ClientConn
+com/comp90015/ClientEntry.java
+ com.comp90015.ClientEntry
 com/comp90015/Client.java
  com.comp90015.Client
 com/comp90015/ClientConsole.java

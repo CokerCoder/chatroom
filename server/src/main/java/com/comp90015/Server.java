@@ -44,7 +44,7 @@ public class Server {
     }
 
     // Concurrent hashset to store the ids
-    private final Set<Integer> ids = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
+    private final Set<Integer> ids = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public Server(int port) {
         this.port = port;
@@ -107,7 +107,7 @@ public class Server {
             }
         } catch (IOException e) {
             System.out.println("Error creating socket...");
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         } finally {
             System.out.println("Server has stopped...");
             close();
@@ -125,7 +125,7 @@ public class Server {
                 serverSocket.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
@@ -204,9 +204,10 @@ public class Server {
      * @return valid or not
      */
     public boolean isValidIdentity(String newIdentity) {
-        if (!isValidName(newIdentity)) {
-            return false;
-        }
+
+        Pattern p = Pattern.compile("[^a-zA-Z0-9]");
+        boolean hasSpecialChar = p.matcher(newIdentity).find();
+        if (hasSpecialChar || newIdentity.length()>16 || newIdentity.length()<3) return false;
         for (var entry : rooms.entrySet()) {
             for (ServerConn serverConn : entry.getValue()) {
                 if (serverConn.getIdentity().equals(newIdentity)) {
@@ -214,6 +215,7 @@ public class Server {
                 }
             }
         }
+
         // make sure new identity cannot be the same as "guestx"
         if (newIdentity.startsWith("guest")) {
             if (newIdentity.length() > 5) {
@@ -235,31 +237,19 @@ public class Server {
 
     /**
      * Validate if a string is valid for a room id.
-     * @param roomid given room id for checking
+     * @param newRoomid given room id for checking
      * @return valid or not
      */
-    public boolean isValidRoomid(String roomid) {
-        if (!isValidName(roomid)) {
-            return false;
-        }
+    public boolean isValidRoomid(String newRoomid) {
+        Pattern p = Pattern.compile("[^a-zA-Z0-9]");
+        boolean hasSpecialChar = p.matcher(newRoomid).find();
+        if (hasSpecialChar || newRoomid.length()>32 || newRoomid.length()<3) return false;
         for (var entry : rooms.entrySet()) {
-            if (roomid.equals(entry.getKey())) {
+            if (newRoomid.equals(entry.getKey())) {
                 return false;
             }
         }
         return true;
-    }
-
-
-    /**
-     * Validate if a string is valid in alphabetic constraint for a new identity.
-     * @param name given identity name for checking
-     * @return valid or not
-     */
-    public boolean isValidName(String name) {
-        Pattern p = Pattern.compile("[^a-zA-Z0-9]");
-        boolean hasSpecialChar = p.matcher(name).find();
-        return (!hasSpecialChar && name.length() <= 16 && name.length() >= 3);
     }
 
 
@@ -273,9 +263,9 @@ public class Server {
         owners.put(roomid, owner);
     }
 
-
     /**
      * Disconnect a guest from the server.
+     * If the room is empty when the owner disconnects, remove the room.
      * @param roomid current room the guest is in
      * @param guest guest to be removed
      */
@@ -284,6 +274,10 @@ public class Server {
         for (Map.Entry<String, String> entry: owners.entrySet()) {
             if (entry.getValue().equals(guest.getIdentity())) {
                 entry.setValue("");
+                if (rooms.get(entry.getKey()).size()==0) {
+                    rooms.remove(entry.getKey());
+                    owners.remove(entry.getKey());
+                }
             }
         }
     }

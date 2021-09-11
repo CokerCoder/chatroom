@@ -34,8 +34,6 @@ public class ClientConn extends Thread {
 
     private final BufferedReader reader; // read from server
 
-    private boolean connectionAlive = false;
-
     public ClientConn(Client client, Socket socket) throws IOException {
         this.client = client;
         this.socket = socket;
@@ -44,7 +42,7 @@ public class ClientConn extends Thread {
 
     @Override
     public void run() {
-        connectionAlive = true;
+        boolean connectionAlive = true;
         String serverMessage;
         while (connectionAlive) {
             try {
@@ -57,7 +55,7 @@ public class ClientConn extends Thread {
                 }
             } catch (IOException e) {
                 connectionAlive = false;
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
                 close();
             }
         }
@@ -103,7 +101,7 @@ public class ClientConn extends Thread {
                                 roomChangeMessage.getFormer());
                     } else {
                         System.out.format("%s moved from %s to %s\n",
-                                client.getIdentity(),
+                                roomChangeMessage.getIdentity(),
                                 roomChangeMessage.getFormer(),
                                 roomChangeMessage.getRoomid());
                     }
@@ -165,7 +163,7 @@ public class ClientConn extends Thread {
             socket.close();
             reader.close();
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 

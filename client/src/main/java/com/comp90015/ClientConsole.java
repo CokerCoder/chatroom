@@ -28,8 +28,6 @@ public class ClientConsole extends Thread {
     private final BufferedReader reader; // read from console
     private final PrintWriter writer; // write to the server
 
-    private boolean connectionAlive = false;
-
     public ClientConsole(Client client, Socket socket) throws IOException {
         this.client = client;
         this.socket = socket;
@@ -40,7 +38,7 @@ public class ClientConsole extends Thread {
     @Override
     public void run() {
         System.out.println(this.client);
-        connectionAlive = true;
+        boolean connectionAlive = true;
         String consoleMessage;
 
         // wait until has been assigned an identity by the server (handled by the ClientConn class)
@@ -53,33 +51,24 @@ public class ClientConsole extends Thread {
 
         while (connectionAlive) {
             try {
-//                synchronized (client) {
-//                    // wait the client set up
-//                    try {
-//                        client.wait();
-//                    } catch (Exception e) {
-//                        System.out.println(e.getMessage());
-//                    }
-//                }
-//                synchronized (client) {
-                // TODO: Concurrency
                 if (client.isQuitting()) {
-                    connectionAlive = false;
                     return;
                 }
                 Thread.sleep(10);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
-//                }
                 consoleMessage = reader.readLine();
                 if (consoleMessage != null) {
                     parse(consoleMessage);
                 } else {
                     connectionAlive = false;
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 connectionAlive = false;
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
                 close();
+            } catch (InterruptedException e) {
+                System.err.println(e.getMessage());
+                Thread.currentThread().interrupt();
             }
         }
         close();
@@ -177,7 +166,7 @@ public class ClientConsole extends Thread {
             reader.close();
             writer.close();
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 }
