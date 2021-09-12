@@ -23,7 +23,7 @@ public class ClientConn extends Thread {
             .registerSubtype(Packet.NewIdentity.class, Constant.NEW_IDENTITY)
             .registerSubtype(Packet.RoomChange.class, Constant.ROOM_CHANGE)
             .registerSubtype(Packet.RoomContents.class, Constant.ROOM_CONTENTS)
-            .registerSubtype(Packet.RoomList.class, Constant.LIST)
+            .registerSubtype(Packet.RoomList.class, Constant.ROOM_LIST)
             .registerSubtype(Packet.ToCMessage.class, Constant.MESSAGE);
 
     Gson gson = new GsonBuilder().registerTypeAdapterFactory(runtimeTypeAdapterFactory).create();
