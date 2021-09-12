@@ -1,12 +1,14 @@
 package com.comp90015;
 
+import com.comp90015.base.Constant;
+
 public class ClientEntry {
 
-    public static final String HOST = "localhost";
-    public static final int PORT = 4444;
-
     public static void main(String[] args) {
-        Client client = new Client(HOST, PORT);
+
+        // TODO: Parse command line argument
+
+        Client client = new Client(Constant.HOST, Constant.PORT);
         client.connect();
     }
 

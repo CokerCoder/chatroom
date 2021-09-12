@@ -1,6 +1,7 @@
 package com.comp90015;
 
 import com.comp90015.base.ChatRoom;
+import com.comp90015.base.Constant;
 import com.comp90015.base.Packet;
 import com.comp90015.base.RuntimeTypeAdapterFactory;
 import com.google.gson.Gson;
@@ -18,16 +19,14 @@ import java.net.Socket;
 public class ClientConn extends Thread {
 
     RuntimeTypeAdapterFactory<Packet.ToClient> runtimeTypeAdapterFactory = RuntimeTypeAdapterFactory
-            .of(Packet.ToClient.class, "type")
-            .registerSubtype(Packet.NewIdentity.class, "newidentity")
-            .registerSubtype(Packet.RoomChange.class, "roomchange")
-            .registerSubtype(Packet.RoomContents.class, "roomcontents")
-            .registerSubtype(Packet.RoomList.class, "roomlist")
-            .registerSubtype(Packet.ToCMessage.class, "message");
+            .of(Packet.ToClient.class, Constant.TYPE)
+            .registerSubtype(Packet.NewIdentity.class, Constant.NEW_IDENTITY)
+            .registerSubtype(Packet.RoomChange.class, Constant.ROOM_CHANGE)
+            .registerSubtype(Packet.RoomContents.class, Constant.ROOM_CONTENTS)
+            .registerSubtype(Packet.RoomList.class, Constant.LIST)
+            .registerSubtype(Packet.ToCMessage.class, Constant.MESSAGE);
 
-    Gson gson = new GsonBuilder()
-            .registerTypeAdapterFactory(runtimeTypeAdapterFactory)
-            .create();
+    Gson gson = new GsonBuilder().registerTypeAdapterFactory(runtimeTypeAdapterFactory).create();
 
     private final Client client;
     private final Socket socket;

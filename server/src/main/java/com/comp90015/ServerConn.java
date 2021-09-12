@@ -1,6 +1,7 @@
 package com.comp90015;
 
 import com.comp90015.base.ChatRoom;
+import com.comp90015.base.Constant;
 import com.comp90015.base.Packet;
 import com.comp90015.base.RuntimeTypeAdapterFactory;
 import com.google.gson.Gson;
@@ -26,11 +27,15 @@ public class ServerConn extends Thread {
     private String roomid;
 
     RuntimeTypeAdapterFactory<Packet.ToServer> runtimeTypeAdapterFactory = RuntimeTypeAdapterFactory
-            .of(Packet.ToServer.class, "type").registerSubtype(Packet.IdentityChange.class, "identitychange")
-            .registerSubtype(Packet.Join.class, "join").registerSubtype(Packet.Who.class, "who")
-            .registerSubtype(Packet.List.class, "list").registerSubtype(Packet.CreateRoom.class, "createroom")
-            .registerSubtype(Packet.Delete.class, "delete").registerSubtype(Packet.Quit.class, "quit")
-            .registerSubtype(Packet.ToSMessage.class, "message");
+            .of(Packet.ToServer.class, Constant.TYPE)
+            .registerSubtype(Packet.IdentityChange.class, Constant.IDENTITY_CHANGE)
+            .registerSubtype(Packet.Join.class, Constant.JOIN)
+            .registerSubtype(Packet.Who.class, Constant.WHO)
+            .registerSubtype(Packet.List.class, Constant.LIST)
+            .registerSubtype(Packet.CreateRoom.class, Constant.CREATE_ROOM)
+            .registerSubtype(Packet.Delete.class, Constant.DELETE)
+            .registerSubtype(Packet.Quit.class, Constant.QUIT)
+            .registerSubtype(Packet.ToSMessage.class, Constant.MESSAGE);
 
     Gson gson = new GsonBuilder().registerTypeAdapterFactory(runtimeTypeAdapterFactory).create();
 
@@ -133,8 +138,10 @@ public class ServerConn extends Thread {
                 sendMessage(gson.toJson(serverMessage));
             }
             // if changing to main hall, send additional information
-            if (roomid.equals("MainHall") && !former.equals(roomid)) {
-                serverMessage = new Packet.RoomContents("MainHall", server.listGuests("MainHall"), "");
+            if (roomid.equals(Constant.MAINHALL) && !former.equals(roomid)) {
+                serverMessage = new Packet.RoomContents(Constant.MAINHALL,
+                        server.listGuests(Constant.MAINHALL),
+                        "");
                 sendMessage(gson.toJson(serverMessage));
 
                 serverMessage = new Packet.RoomList(server.listRooms());
@@ -199,10 +206,10 @@ public class ServerConn extends Thread {
             }
             // join each guest in the given room to MainHall
             for (ServerConn guest : server.getRooms().get(toDelete)) {
-                guest.setRoomid("MainHall");
-                serverMessage = new Packet.RoomChange(guest.getIdentity(), toDelete, "MainHall");
+                guest.setRoomid(Constant.MAINHALL);
+                serverMessage = new Packet.RoomChange(guest.getIdentity(), toDelete, Constant.MAINHALL);
                 guest.sendMessage(gson.toJson(serverMessage));
-                server.joinRoom(guest, "MainHall");
+                server.joinRoom(guest, Constant.MAINHALL);
             }
 
             // remove the room
@@ -214,9 +221,9 @@ public class ServerConn extends Thread {
     }
 
     private void handleGuestId() {
-        if (identity.startsWith("guest")) {
-            if (identity.length() > 5) {
-                String tail = identity.substring(5);
+        if (identity.startsWith(Constant.GUEST)) {
+            if (identity.length() > Constant.GUEST.length()) {
+                String tail = identity.substring(Constant.GUEST.length());
                 try {
                     int identityInt = Integer.parseInt(tail);
                     server.getIds().remove(identityInt);

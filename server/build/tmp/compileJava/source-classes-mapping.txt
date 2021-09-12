@@ -1,6 +1,6 @@
-com/comp90015/ServerEntry.java
- com.comp90015.ServerEntry
 com/comp90015/ServerConn.java
  com.comp90015.ServerConn
 com/comp90015/Server.java
  com.comp90015.Server
+com/comp90015/ServerEntry.java
+ com.comp90015.ServerEntry

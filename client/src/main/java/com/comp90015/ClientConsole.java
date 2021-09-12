@@ -1,5 +1,6 @@
 package com.comp90015;
 
+import com.comp90015.base.Constant;
 import com.comp90015.base.Packet;
 import com.google.gson.Gson;
 
@@ -54,6 +55,7 @@ public class ClientConsole extends Thread {
                 if (client.isQuitting()) {
                     return;
                 }
+                // wait for any update on the "[roomid] identity" update by the ClientConn
                 Thread.sleep(10);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
                 consoleMessage = reader.readLine();
@@ -101,31 +103,31 @@ public class ClientConsole extends Thread {
         Packet.ToServer toServerMessage = null;
 
         switch (words[0]) {
-            case "identitychange":
+            case Constant.IDENTITY_CHANGE:
                 if (words.length > 1) {
                     toServerMessage = new Packet.IdentityChange(words[1]);
                 } else {
                     System.out.println("Invalid command");
                 }
                 break;
-            case "join":
+            case Constant.JOIN:
                 if (words.length > 1) {
                     toServerMessage = new Packet.Join(words[1]);
                 } else {
                     System.out.println("Invalid command");
                 }
                 break;
-            case "who":
+            case Constant.WHO:
                 if (words.length > 1) {
                     toServerMessage = new Packet.Who(words[1]);
                 } else {
                     System.out.println("Invalid command");
                 }
                 break;
-            case "list":
+            case Constant.LIST:
                 toServerMessage = new Packet.List();
                 break;
-            case "createroom":
+            case Constant.CREATE_ROOM:
                 if (words.length > 1) {
                     toServerMessage = new Packet.CreateRoom(words[1]);
                     client.setCreatingRoom(words[1]);
@@ -133,11 +135,11 @@ public class ClientConsole extends Thread {
                     System.out.println("Invalid command");
                 }
                 break;
-            case "quit":
+            case Constant.QUIT:
                 client.setQuitting(true);
                 toServerMessage = new Packet.Quit();
                 break;
-            case "delete":
+            case Constant.DELETE:
                 if (words.length > 1) {
                     toServerMessage = new Packet.Delete(words[1]);
                 } else {

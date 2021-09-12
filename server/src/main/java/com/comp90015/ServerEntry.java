@@ -1,14 +1,14 @@
 package com.comp90015;
 
-public class ServerEntry {
+import com.comp90015.base.Constant;
 
-    public static final int PORT = 4444;
+public class ServerEntry {
 
     public static void main(String[] args) {
 
         // TODO: Parse command line argument
 
-        Server server = new Server(PORT);
+        Server server = new Server(Constant.PORT);
         server.handle();
     }
 

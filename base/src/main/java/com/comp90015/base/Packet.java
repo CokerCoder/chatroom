@@ -11,11 +11,11 @@ public class Packet {
     }
 
     public static class NewIdentity extends ToClient {
-        private String former;
-        private String identity;
+        private final String former;
+        private final String identity;
 
         public NewIdentity(String former, String identity) {
-            super("newidentity");
+            super(Constant.NEW_IDENTITY);
             this.former = former;
             this.identity = identity;
         }
@@ -30,12 +30,12 @@ public class Packet {
     }
 
     public static class RoomChange extends ToClient {
-        private String identity;
-        private String former;
-        private String roomid;
+        private final String identity;
+        private final String former;
+        private final String roomid;
 
         public RoomChange(String identity, String former, String roomid) {
-            super("roomchange");
+            super(Constant.ROOM_CHANGE);
             this.identity = identity;
             this.former = former;
             this.roomid = roomid;
@@ -55,12 +55,12 @@ public class Packet {
     }
 
     public static class RoomContents extends ToClient {
-        private String roomid;
-        private String identities;
-        private String owner;
+        private final String roomid;
+        private final String identities;
+        private final String owner;
 
         public RoomContents(String roomid, String identities, String owner) {
-            super("roomcontents");
+            super(Constant.ROOM_CONTENTS);
             this.roomid = roomid;
             this.identities = identities;
             this.owner = owner;
@@ -80,10 +80,10 @@ public class Packet {
     }
 
     public static class RoomList extends ToClient {
-        private String rooms;
+        private final String rooms;
 
         public RoomList(String rooms) {
-            super("roomlist");
+            super(Constant.ROOM_LIST);
             this.rooms = rooms;
         }
 
@@ -93,11 +93,11 @@ public class Packet {
     }
 
     public static class ToCMessage extends ToClient {
-        private String content;
-        private String identity;
+        private final String content;
+        private final String identity;
 
         public ToCMessage(String content, String identity) {
-            super("message");
+            super(Constant.MESSAGE);
             this.content = content;
             this.identity = identity;
         }
@@ -122,10 +122,10 @@ public class Packet {
     }
 
     public static class IdentityChange extends ToServer {
-        private String identity;
+        private final String identity;
 
         public IdentityChange(String identity) {
-            super("identitychange");
+            super(Constant.IDENTITY_CHANGE);
             this.identity = identity;
         }
 
@@ -135,10 +135,10 @@ public class Packet {
     }
 
     public static class Join extends ToServer {
-        private String roomid;
+        private final String roomid;
 
         public Join(String roomid) {
-            super("join");
+            super(Constant.JOIN);
             this.roomid = roomid;
         }
 
@@ -148,10 +148,10 @@ public class Packet {
     }
 
     public static class Who extends ToServer {
-        private String roomid;
+        private final String roomid;
 
         public Who(String roomid) {
-            super("who");
+            super(Constant.WHO);
             this.roomid = roomid;
         }
 
@@ -162,15 +162,15 @@ public class Packet {
 
     public static class List extends ToServer {
         public List() {
-            super("list");
+            super(Constant.LIST);
         }
     }
 
     public static class CreateRoom extends ToServer {
-        private String roomid;
+        private final String roomid;
 
         public CreateRoom(String roomid) {
-            super("createroom");
+            super(Constant.CREATE_ROOM);
             this.roomid = roomid;
         }
 
@@ -180,10 +180,10 @@ public class Packet {
     }
 
     public static class Delete extends ToServer {
-        private String roomid;
+        private final String roomid;
 
         public Delete(String roomid) {
-            super("delete");
+            super(Constant.DELETE);
             this.roomid = roomid;
         }
 
@@ -194,7 +194,7 @@ public class Packet {
 
     public static class Quit extends ToServer {
         public Quit() {
-            super("quit");
+            super(Constant.QUIT);
         }
     }
 
@@ -203,10 +203,10 @@ public class Packet {
             return content;
         }
 
-        private String content;
+        private final String content;
 
         public ToSMessage(String content) {
-            super("message");
+            super(Constant.MESSAGE);
             this.content = content;
         }
     }

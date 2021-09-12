@@ -16,6 +16,7 @@ public class Client {
     // this field is to check if a room is successfully created by the server
     private volatile String creatingRoom = null;
 
+    // this field is to check if the client is asking for leaving the server
     private volatile boolean quitting = false;
 
 
