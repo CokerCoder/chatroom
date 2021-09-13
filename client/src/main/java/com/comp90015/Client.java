@@ -26,6 +26,7 @@ public class Client {
     }
 
     public void connect() {
+        System.out.format("Initializing connection to %s on port %d\n", host, port);
         try {
             Socket socket = new Socket(host, port);
             /*

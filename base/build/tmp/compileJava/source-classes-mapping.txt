@@ -1,6 +1,7 @@
-com/comp90015/base/RuntimeTypeAdapterFactory.java
- com.comp90015.base.RuntimeTypeAdapterFactory
- com.comp90015.base.RuntimeTypeAdapterFactory$1
+com/comp90015/base/Constant.java
+ com.comp90015.base.Constant
+com/comp90015/base/ChatRoom.java
+ com.comp90015.base.ChatRoom
 com/comp90015/base/Packet.java
  com.comp90015.base.Packet
  com.comp90015.base.Packet$CreateRoom
@@ -18,5 +19,6 @@ com/comp90015/base/Packet.java
  com.comp90015.base.Packet$ToSMessage
  com.comp90015.base.Packet$ToServer
  com.comp90015.base.Packet$Who
-com/comp90015/base/ChatRoom.java
- com.comp90015.base.ChatRoom
+com/comp90015/base/RuntimeTypeAdapterFactory.java
+ com.comp90015.base.RuntimeTypeAdapterFactory
+ com.comp90015.base.RuntimeTypeAdapterFactory$1

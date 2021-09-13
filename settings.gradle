@@ -1,4 +1,4 @@
-rootProject.name = 'a1'
+rootProject.name = 'comp90015'
 include 'server'
 include 'client'
 include 'base'

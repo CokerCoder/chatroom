@@ -66,6 +66,7 @@ public class Server {
      * for each connected client make a new thread to handle its request.
      */
     public void handle() {
+        System.out.println("Server running on port: "+ port);
         alive = true;
         try {
             serverSocket = new ServerSocket(port);
