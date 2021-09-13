@@ -38,7 +38,6 @@ public class ClientConsole extends Thread {
 
     @Override
     public void run() {
-        System.out.println(this.client);
         boolean connectionAlive = true;
         String consoleMessage;
 
@@ -56,7 +55,7 @@ public class ClientConsole extends Thread {
                     return;
                 }
                 // wait for any update on the "[roomid] identity" update by the ClientConn
-                Thread.sleep(100);
+                Thread.sleep(50);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
                 consoleMessage = reader.readLine();
                 if (consoleMessage != null) {
