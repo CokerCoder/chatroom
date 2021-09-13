@@ -56,7 +56,7 @@ public class ClientConsole extends Thread {
                     return;
                 }
                 // wait for any update on the "[roomid] identity" update by the ClientConn
-                Thread.sleep(10);
+                Thread.sleep(100);
                 System.out.format("[%s] %s> ", client.getRoomid(), client.getIdentity());
                 consoleMessage = reader.readLine();
                 if (consoleMessage != null) {

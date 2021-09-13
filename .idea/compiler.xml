@@ -21,7 +21,7 @@
         <module name="comp90015.client.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="14">
+    <bytecodeTargetLevel target="11">
       <module name="a1" target="14" />
       <module name="a1.base" target="14" />
       <module name="a1.base.main" target="14" />

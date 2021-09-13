@@ -17,6 +17,7 @@ dependencies {
 
 group 'org.comp90015'
 version '0.0.1'
+sourceCompatibility = 11.1
 
 repositories {
     mavenCentral()
