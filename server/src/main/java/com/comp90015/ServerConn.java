@@ -7,11 +7,9 @@ import com.comp90015.base.RuntimeTypeAdapterFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +40,9 @@ public class ServerConn extends Thread {
     public ServerConn(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
-        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        this.writer = new PrintWriter(socket.getOutputStream(), true);
+        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+        this.writer = new PrintWriter(new OutputStreamWriter
+                (socket.getOutputStream(), StandardCharsets.UTF_8), true);
     }
 
     @Override

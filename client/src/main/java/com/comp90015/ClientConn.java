@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 
 /*
@@ -36,7 +37,7 @@ public class ClientConn extends Thread {
     public ClientConn(Client client, Socket socket) throws IOException {
         this.client = client;
         this.socket = socket;
-        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
     }
 
     @Override
@@ -45,7 +46,7 @@ public class ClientConn extends Thread {
         String serverMessage;
         while (connectionAlive) {
             try {
-                if (client.isQuitting()) connectionAlive = false;
+                if (client.isQuitting() || socket.isClosed()) return;
                 serverMessage  = reader.readLine();
                 if (serverMessage != null) {
                     parseJSON(serverMessage);
