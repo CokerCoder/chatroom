@@ -14,27 +14,27 @@ public class ClientEntry {
 
     public static void main(String[] args) {
 
-//        new CommandLine(new ServerCommandLineParser()).execute(args);
+        new CommandLine(new ServerCommandLineParser()).execute(args);
 
         Client client = new Client(HOST, PORT);
         client.connect();
 
     }
 
-//    @Command(name = "ServerCommandLineParser", mixinStandardHelpOptions = true)
-//    static class ServerCommandLineParser implements Runnable {
-//
-//        @Option(names = { "-p", "--port" }, description = "Port Number")
-//        private int port = Constant.PORT;
-//
-//        @Parameters(paramLabel = "hostname", description = "Host IP Address", defaultValue = Constant.HOST)
-//        private String host = Constant.HOST;
-//
-//        @Override
-//        public void run() {
-//            PORT = port;
-//            HOST = host;
-//        }
-//    }
+    @Command(name = "ServerCommandLineParser", mixinStandardHelpOptions = true)
+    static class ServerCommandLineParser implements Runnable {
+
+        @Option(names = { "-p", "--port" }, description = "Port Number")
+        private int port = Constant.PORT;
+
+        @Parameters(paramLabel = "hostname", description = "Host IP Address", defaultValue = Constant.HOST)
+        private String host = Constant.HOST;
+
+        @Override
+        public void run() {
+            PORT = port;
+            HOST = host;
+        }
+    }
 
 }
